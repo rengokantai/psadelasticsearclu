@@ -77,5 +77,23 @@ cd usr/share/elasticsearch/bin
 Then open the plugin in browser:
 ```
 nodename:9200/_plugin/head/
+```
+- 4 data node
+change:```vim /etc/elasticsearch/elasticsearch.yml```
+```
+cluster.name: xx (same as previous cluster name)
+node.name: data-1
+node.master: false
+node.data: true
+
+network.host: xx.xx.xx.xx
+
+discovery.zen.ping.multicast.enabled: false
+discovery.zen.ping.unicast.hosts: ["client1","client2","master1","master2","master3","data1","data2"]
+```
+Then
+```
+service elasticsearch restart
+```
 
 
