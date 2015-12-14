@@ -140,6 +140,26 @@ using data
   "b":"yy"
   "c":"2015-01-01T01:01:01Z"
 }
+```
+####6
+- 1 (disable shard auto-allocation when upgrading elasticsearch)
+open ```http://client-01:9200/_cluster/settings``` choose 'put'
+Note 'transient' means this setting is temp
+```
+{
+   "transient":{
+      "cluster.routing.allocation.enable" : "none"
+   }
+}
+```
 
+To recover setting:
+```
+{
+   "transient":{
+      "cluster.routing.allocation.enable" : "all"
+   }
+}
+```
 
 
