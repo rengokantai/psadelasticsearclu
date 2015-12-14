@@ -141,7 +141,7 @@ using data
   "c":"2015-01-01T01:01:01Z"
 }
 ```
-####6
+#### cp6
 - 1 (disable shard auto-allocation when upgrading elasticsearch)
 open ```http://client-01:9200/_cluster/settings``` choose 'put'
 Note 'transient' means this setting is temp
@@ -218,5 +218,21 @@ apt-get install python-elasticsearch-curator
 After installation:
 ```
 curator --host client-01 show indices --all-indices
+```
+#### cp7
+
+- 1 Health
+Ex:
+```http://client-01:9200/_cluster/health```
+More details:
+```http://client-01:9200/_cluster/health?level=indices```
+Stats:
+```http://client-01:9200/_nodes/stats```
+
+- 2 Marvel
+```
+cd /usr/share/elasticsearch/bin
+./plugin install marvel-agent
+
 ```
 
