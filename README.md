@@ -223,11 +223,19 @@ curator --host client-01 show indices --all-indices
 
 - 1 Health
 Ex:
-```http://client-01:9200/_cluster/health```
+```
+http://client-01:9200/_cluster/health
+```
 More details:
-```http://client-01:9200/_cluster/health?level=indices```
+```
+http://client-01:9200/_cluster/health?level=indices
+```
+
 Stats:
-```http://client-01:9200/_nodes/stats```
+
+```
+http://client-01:9200/_nodes/stats
+```
 
 - 2 Marvel
 ```
