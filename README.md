@@ -95,5 +95,51 @@ Then
 ```
 service elasticsearch restart
 ```
+#### cp5
+- 4 template, time-based idx
+Open postman, choose 'POST' and url should be ```http://nodename:9200/_template/log_tamplate```
+send data as JSON:
+```json
+{  
+   "template":"log_*",
+   "aliases":{  
+      "log":{  
+
+      }
+   },
+   "settings":{  
+      "index":{  
+         "number_of_shards":5,
+         "number_of_replicas":1
+      }
+   },
+   "mappings":{  
+      "log_event":{  
+         "properties":{  
+            "a":{  
+               "type":"string"
+            },
+            "b":{  
+               "type":"string"
+            }
+            "c":{
+               "type":"date"
+            }
+         }
+      }
+   }
+}
+```
+
+Try to insert some data:
+Type ```http://nodename:9200/log_yyyymmdd/log_event``` choose 'post'
+using data
+```
+{
+  "a":"xx",
+  "b":"yy"
+  "c":"2015-01-01T01:01:01Z"
+}
+
 
 
