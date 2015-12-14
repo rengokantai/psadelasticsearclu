@@ -121,7 +121,7 @@ send data as JSON:
             },
             "b":{  
                "type":"string"
-            }
+            },
             "c":{
                "type":"date"
             }
@@ -202,3 +202,21 @@ Check attribute ```indices```
 Then delete log_* indices,we can rectore those data"
 Open```http://client-01:9200/_snapshots/es_repo_01/snapshot02/_restore``` choose 'post'
 Enter the returned json data we get
+
+- 3 GUI tool for backup
+```wget -qO - https://packages.elastic.co/GPG/KEY-elasticsearch |sudo apt-key add -```
+Then 
+``` vim /etc/apt/sources;list.d/curator.list```
+Add
+```deb http://package.elastic.co/curator/3/debian stable main```
+Then
+```
+apt-get update
+apt-get install python-elasticsearch-curator
+```
+
+After installation:
+```
+curator --host client-01 show indices --all-indices
+```
+
