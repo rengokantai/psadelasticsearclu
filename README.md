@@ -161,5 +161,44 @@ To recover setting:
    }
 }
 ```
+- 2
+Open ```vim /etc/elasticsearch/elasticsearch.yml``` in master machine,
+Edit
+```
+path.repo: ["/mnt/esbackup"]
+```
+Do this in all machines.
+open```http://client-01:9200/_snapshots/es_repo_01``` choose 'put'
+```
+{
+   "type":"fs",
+   "settings":{
+      "ocation":"/mnt/esbackup"
+   }
+}
+```
+open```http://client-01:9200/_snapshots/es_repo_01/snapshot01``` choose 'put'
+should return
+```
+{
+   "accepted":"true"
+}
+```
+open```http://client-01:9200/_snapshots/es_repo_01/snapshot01/status``` choose 'get'
 
+should show ```success```
 
+Now create a new snapshot.
+open```http://client-01:9200/_snapshots/es_repo_01/snapshot02``` choose 'post'
+with following data:
+```
+{
+   "indice":"log_20151213,log_20151214"
+}
+```
+Then open```http://client-01:9200/_snapshots/es_repo_01/snapshot02``` choose 'get'
+Check attribute ```indices```
+
+Then delete log_* indices,we can rectore those data"
+Open```http://client-01:9200/_snapshots/es_repo_01/snapshot02/_restore``` choose 'post'
+Enter the returned json data we get
