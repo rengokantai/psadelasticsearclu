@@ -233,6 +233,5 @@ Stats:
 ```
 cd /usr/share/elasticsearch/bin
 ./plugin install marvel-agent
-
 ```
 
