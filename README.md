@@ -219,10 +219,10 @@ using data
 Test in head plugin->any request using POST
 ```
 http://54.85.0.0:9200/log/
-http://54.85.0.41:9200/log_20150111/
+http://54.85.0.0:9200/log_20150111/
 ```
-#### cp6
-- 1 (disable shard auto-allocation when upgrading elasticsearch)
+##### maintaining es cluster
+######1 (disable shard auto-allocation when upgrading elasticsearch)
 open ```http://client-01:9200/_cluster/settings``` choose 'put'
 Note 'transient' means this setting is temp
 ```
@@ -232,7 +232,13 @@ Note 'transient' means this setting is temp
    }
 }
 ```
-
+When we shut down data node, it will not rebalance.  
+Then upgrade:
+```
+service stop elasticsearch
+....upgrade
+service start elasticsearch
+```
 To recover setting:
 ```
 {
@@ -247,16 +253,18 @@ Edit
 ```
 path.repo: ["/mnt/esbackup"]
 ```
-Do this in all machines.
+Do this in all machines.  
+To create repo:  
 open```http://client-01:9200/_snapshots/es_repo_01``` choose 'put'
 ```
 {
    "type":"fs",
    "settings":{
-      "ocation":"/mnt/esbackup"
+      "location":"/mnt/esbackup"
    }
 }
 ```
+To perform first shpshot:
 open```http://client-01:9200/_snapshots/es_repo_01/snapshot01``` choose 'put'
 should return
 ```
@@ -264,6 +272,7 @@ should return
    "accepted":"true"
 }
 ```
+get status:  
 open```http://client-01:9200/_snapshots/es_repo_01/snapshot01/status``` choose 'get'
 
 should show ```success```
@@ -283,12 +292,16 @@ Then delete log_* indices,we can rectore those data"
 Open```http://client-01:9200/_snapshots/es_repo_01/snapshot02/_restore``` choose 'post'
 Enter the returned json data we get
 
-- 3 GUI tool for backup
-```wget -qO - https://packages.elastic.co/GPG/KEY-elasticsearch |sudo apt-key add -```
+######Curator: GUI tool for backup
+```
+wget -qO - https://packages.elastic.co/GPG/KEY-elasticsearch | sudo apt-key add -
+```
 Then 
-``` vim /etc/apt/sources;list.d/curator.list```
+``` vim /etc/apt/sources.list.d/curator.list```
 Add
-```deb http://package.elastic.co/curator/3/debian stable main```
+```
+deb http://packages.elastic.co/curator/3/debian stable main
+```
 Then
 ```
 apt-get update
@@ -297,18 +310,76 @@ apt-get install python-elasticsearch-curator
 
 After installation:
 ```
-curator --host client-01 show indices --all-indices
+curator --host client-01 show indices --all-indices //ex
+curator --host 54.85.0.0 show indices --all-indices
+curator --host 54.85.0.0 show indices --older-than 0 --time-unit days --timestring '%Y%m%d'
+curator --host 54.85.0.0 snapshot --repository es_repo_01 --name snapshot01 indices --older-than 0 --time-unit days --prefix log_
 ```
-#### cp7
-
-- 1 Health
+delete indices:
+```
+curator --host 54.85.0.0 delete indices --older-than 0 --time-unit days --timestring '%Y%m%d' --prefix log_
+```
+#####monitoring
+######Health API
 Ex:
 ```
 http://client-01:9200/_cluster/health
 ```
+get response like this
+```
+{
+  "cluster_name": "yd",
+  "status": "green",
+  "timed_out": false,
+  "number_of_nodes": 4,
+  "number_of_data_nodes": 3,
+  "active_primary_shards": 5,
+  "active_shards": 10,
+  "relocating_shards": 0,
+  "initializing_shards": 0,
+  "unassigned_shards": 0,
+  "delayed_unassigned_shards": 0,
+  "number_of_pending_tasks": 0,
+  "number_of_in_flight_fetch": 0,
+  "task_max_waiting_in_queue_millis": 0,
+  "active_shards_percent_as_number": 100
+}
+```
 More details:
 ```
 http://client-01:9200/_cluster/health?level=indices
+```
+return like this
+```
+{
+  "cluster_name": "yd",
+  "status": "green",
+  "timed_out": false,
+  "number_of_nodes": 4,
+  "number_of_data_nodes": 3,
+  "active_primary_shards": 5,
+  "active_shards": 10,
+  "relocating_shards": 0,
+  "initializing_shards": 0,
+  "unassigned_shards": 0,
+  "delayed_unassigned_shards": 0,
+  "number_of_pending_tasks": 0,
+  "number_of_in_flight_fetch": 0,
+  "task_max_waiting_in_queue_millis": 0,
+  "active_shards_percent_as_number": 100,
+  "indices": {
+    "log_20151111": {
+      "status": "green",
+      "number_of_shards": 5,
+      "number_of_replicas": 1,
+      "active_primary_shards": 5,
+      "active_shards": 10,
+      "relocating_shards": 0,
+      "initializing_shards": 0,
+      "unassigned_shards": 0
+    }
+  }
+}
 ```
 
 Stats:
@@ -320,6 +391,26 @@ http://client-01:9200/_nodes/stats
 - 2 Marvel
 ```
 cd /usr/share/elasticsearch/bin
+./plugin install license
 ./plugin install marvel-agent
+```
+download kibana,
+```
+wget https://download.elastic.co/kibana/kibana/kibana_4.5.0_amd64.deb
+dpkg -i
+```
+then
+```
+vim /opt/kibana/config/kibana.yml
+```
+edit
+```
+elasticsearch.url: "http://172.31.1.1:9200"  //client node ip
+```
+Then
+```
+cd /opt/kibana/bin
+./kibana plugin --install elasticsearch/marvel/latest
+./kibana &  (port 5601)
 ```
 
