@@ -71,10 +71,8 @@ setthis, we dont want to allow data nodes to be queried
 ```
 http.enabled: false
 ```
-
-
-##### cp4
-- 2 client node
+##### installing and configuring the cluster
+######first client node
 ```
 service elasticsearch start
 update-rc.d elasticsearch defaults 95 10
@@ -82,8 +80,8 @@ vim /etc/elasticsearch/elasticsearch.yml
 ```
 change:
 ```
-cluster.name: xx
-node.name: client-1
+cluster.name: yd
+node.name: c1
 node.client: true
 node.data: false
 ```
@@ -93,7 +91,11 @@ service elasticsearch restart
 ulimit -n
 
 ```
-Then``` vim /etc/security/limits.conf```Add the following line:
+Then
+``` 
+vim /etc/security/limits.conf
+```
+Add the following line:
 ```
 *    soft   nofile   64000
 *    hard   nofile   64000
@@ -114,20 +116,22 @@ ulimit -m
 ```
 should show unlimited.
 Finally, ```vim /etc/environment```
-Add```ES_HEAP_SIZE="512m"```
+Add```ES_HEAP_SIZE="512m"``
 
-- 3 master node
+reboot server.`
+
+######first master node
 change:```vim /etc/elasticsearch/elasticsearch.yml```
 ```
-cluster.name: xx (same as previous cluster name)
-node.name: master-1
+cluster.name: yd (same as previous cluster name)
+node.name: m1
 node.master: true
 node.data: false
 
-network.host: should be remoteaddress(xx.xx.xx.xx)
+network.host: 172.1.2.3
 
 discovery.zen.ping.multicast.enabled: false
-discovery.zen.ping.unicast.hosts: ["client1","client2","master1","master2","master3","data1","data2"]
+discovery.zen.ping.unicast.hosts: ["client1","client2","master1","master2","master3","data1","data2"] //if not bind to /etc/host, using ip
 ```
 
 Open ```vim /etc/elasticsearch/elasticsearch.yml``` in client machine,
@@ -142,18 +146,18 @@ To test:
 
 Install plugin:
 ```
-cd usr/share/elasticsearch/bin
+cd /usr/share/elasticsearch/bin
 ./plugin install mobz/elasticsearch-head
 ```
 Then open the plugin in browser:
 ```
 nodename:9200/_plugin/head/
 ```
-- 4 data node
+######first data node
 change:```vim /etc/elasticsearch/elasticsearch.yml```
 ```
-cluster.name: xx (same as previous cluster name)
-node.name: data-1
+cluster.name: yd
+node.name: d1
 node.master: false
 node.data: true
 
@@ -166,8 +170,8 @@ Then
 ```
 service elasticsearch restart
 ```
-#### cp5
-- 4 template, time-based idx
+##### index stra
+######template, time-based idx
 Open postman, choose 'POST' and url should be ```http://nodename:9200/_template/log_tamplate```
 send data as JSON:
 ```json
@@ -187,13 +191,13 @@ send data as JSON:
    "mappings":{  
       "log_event":{  
          "properties":{  
-            "a":{  
+            "log_event":{  
                "type":"string"
             },
-            "b":{  
+            "log_text":{  
                "type":"string"
             },
-            "c":{
+            "log_date":{
                "type":"date"
             }
          }
@@ -207,10 +211,15 @@ Type ```http://nodename:9200/log_yyyymmdd/log_event``` choose 'post'
 using data
 ```
 {
-  "a":"xx",
-  "b":"yy"
-  "c":"2015-01-01T01:01:01Z"
+  "log_name":"xx",
+  "log_text":"yy",
+  "log_date":"2015-01-01T01:01:01Z"
 }
+```
+Test in head plugin->any request using POST
+```
+http://54.85.0.0:9200/log/
+http://54.85.0.41:9200/log_20150111/
 ```
 #### cp6
 - 1 (disable shard auto-allocation when upgrading elasticsearch)
