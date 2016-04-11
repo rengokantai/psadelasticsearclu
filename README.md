@@ -25,6 +25,52 @@ restart
 ```
 service elasticsearch restart
 ```
+######windows
+```
+es\bin> service install elasticsearch
+```
+using powershell
+```
+invoke-webrequest http://localhost:9200
+```
+#####clustering and config stra
+######planning
+set in yaml file:
+```
+manimum_master_nodes:x
+```
+good rule is no. of master nodes/2+1
+######cluster and operating systen setting
+for server:
+```
+munimun_master_nodes: 2
+```
+
+```
+gateway.recovery_after_nodes:8
+gateway.wxpected_nodes:9
+gateway.recover_after_time: 3M
+```
+for master node:
+```
+node.master: true
+node.data: false
+```
+for client node:
+```
+node.client: true
+node.data:false
+```
+for data node:
+```
+node.data: true
+node.master: false
+node.client: false
+```
+setthis, we dont want to allow data nodes to be queried
+```
+http.enabled: false
+```
 
 
 ##### cp4
