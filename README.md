@@ -1,8 +1,33 @@
-# psadelasticsearclu
+#### psadelasticsearclu
+#####install 
+######ubuntu
+```
+cat /etc/os-release
+add-apt-repository ppa:webupd8team/java
+apt-get update
+apt-get install oracle-java8-installer
+java -version
+wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.1/elasticsearch-2.3.1.deb
+dpkg -i elasticsearch-2.3.1.deb
+service elasticsearch start
+```
+check config files:
+```
+ls /etc/elasticsearch
+vim elasticsearch.yml
+```
+edit
+```
+custer.name: yd
+node.name: n1
+```
+restart
+```
+service elasticsearch restart
+```
 
 
-
-#### cp4
+##### cp4
 - 2 client node
 ```
 service elasticsearch start
